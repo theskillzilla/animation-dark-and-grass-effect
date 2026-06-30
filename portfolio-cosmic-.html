@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkFlow - Close the Rift</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://db.onlinewebfonts.com/c/6e47ef470dd19698c911332a9b4d1cf4?family=Neue+Haas+Grotesk+Text+Pro" rel="stylesheet" />
+  <link href="https://db.onlinewebfonts.com/c/dec0d9b4e22ca588dc20e1e2e09a59b5?family=Neue+Haas+Grotesk+Display+Pro+55+Roman" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com/3.4.1"></script>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    html {
+      height: 100%;
+      scroll-behavior: smooth;
+      scroll-padding-top: 24px;
+    }
+
+    body, #root {
+      height: 100%;
+      margin: 0;
+      font-family: 'Neue Haas Grotesk Display Pro 55 Roman', 'Neue Haas Grotesk Text Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      background: #1f2a1d;
+    }
+
+    .hero-shell {
+      isolation: isolate;
+    }
+
+    .hero-shell::before {
+      content: "";
+      position: absolute;
+      inset: -20% -10% auto auto;
+      width: 36rem;
+      height: 36rem;
+      background: radial-gradient(circle, rgba(133, 171, 139, 0.24) 0%, rgba(133, 171, 139, 0) 68%);
+      filter: blur(10px);
+      transform: translate3d(0,0,0);
+      animation: drift 12s ease-in-out infinite alternate;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero-shell::after {
+      content: "";
+      position: absolute;
+      inset: auto auto -10% -8%;
+      width: 24rem;
+      height: 24rem;
+      background: radial-gradient(circle, rgba(255,255,255,0.11) 0%, rgba(255,255,255,0) 70%);
+      filter: blur(8px);
+      animation: drift 10s ease-in-out infinite alternate-reverse;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero-overlay {
+      background: linear-gradient(180deg, rgba(8, 15, 11, 0.42) 0%, rgba(8, 15, 11, 0.16) 38%, rgba(8, 15, 11, 0.48) 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px) scale(0.98);
+      animation-name: revealUp;
+      animation-fill-mode: forwards;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity, transform;
+    }
+
+    .reveal-1 { animation-duration: 0.85s; animation-delay: 0.05s; }
+    .reveal-2 { animation-duration: 0.95s; animation-delay: 0.15s; }
+    .reveal-3 { animation-duration: 1.05s; animation-delay: 0.24s; }
+    .reveal-4 { animation-duration: 1.12s; animation-delay: 0.34s; }
+    .reveal-5 { animation-duration: 1.18s; animation-delay: 0.44s; }
+    .reveal-6 { animation-duration: 0.9s; animation-delay: 0.58s; }
+
+    .nav-link,
+    .nav-cta,
+    .hero-btn,
+    .mobile-link,
+    .menu-toggle-btn {
+      transition: transform 280ms ease, box-shadow 280ms ease, background-color 280ms ease, color 280ms ease, border-color 280ms ease;
+    }
+
+    .nav-link:hover,
+    .nav-cta:hover,
+    .hero-btn:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.14);
+    }
+
+    .hero-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.28) 45%, transparent 100%);
+      transform: translateX(-140%);
+      transition: transform 650ms ease;
+    }
+
+    .hero-btn:hover::before {
+      transform: translateX(140%);
+    }
+
+    @keyframes revealUp {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes drift {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      100% { transform: translate3d(2rem, -1.2rem, 0) scale(1.08); }
+    }
+  </style>
+</head>
+<body class="bg-[#1f2a1d]">
+
+  <section class="hero-shell relative w-full min-h-screen sm:h-screen overflow-hidden">
+    
+    <div id="boomerang-container" class="absolute inset-0 w-full h-full">
+      <div class="hero-overlay absolute inset-0 z-[1] pointer-events-none"></div>
+      <video
+        id="bg-video"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260511_131941_d136af49-e243-493a-be14-6ff3f24e09e6.mp4"
+        class="w-full h-full object-cover block"
+        muted
+        playsinline
+        preload="auto"
+        crossorigin="anonymous"
+      ></video>
+      <canvas
+        id="display-canvas"
+        class="w-full h-full object-cover hidden"
+      ></canvas>
+    </div>
+
+    <nav class="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 sm:px-6 md:px-10 py-4 sm:py-6">
+      <div class="reveal reveal-1 flex items-center gap-2 text-[#f4f7ef]">
+        <span class="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight">
+          LinkFlow<sup class="text-[10px] sm:text-xs font-medium">TM</sup>
+        </span>
+      </div>
+
+      <div class="hidden lg:flex items-center gap-1 bg-white/12 backdrop-blur-2xl rounded-full pl-6 pr-1 py-1 shadow-[0_10px_40px_rgba(0,0,0,0.16)] border border-white/20 reveal reveal-2">
+        <a href="#mission" class="nav-link text-sm px-3 py-2 font-semibold text-white/90 hover:text-white">Purpose</a>
+        <a href="#how" class="nav-link text-sm px-3 py-2 font-medium text-white/70 hover:text-white">The Process</a>
+        <a href="#pricing" class="nav-link text-sm px-3 py-2 font-medium text-white/70 hover:text-white">Tariffs</a>
+        <button class="nav-cta ml-2 bg-white/90 hover:bg-white text-[#1f2a1d] text-sm font-semibold px-5 py-2.5 rounded-full shadow-lg">
+          Try it Live
+        </button>
+      </div>
+
+      <div class="reveal reveal-2 flex items-center gap-3 sm:gap-6 text-[#f4f7ef]">
+        <a href="#signup" class="hidden sm:flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity">
+          <i data-lucide="user-plus" class="w-4 h-4"></i>
+          Sign Me Up!
+        </a>
+        <a href="#login" class="hidden sm:flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          Enter
+        </a>
+        
+        <button
+          id="menu-toggle-btn"
+          class="menu-toggle-btn lg:hidden relative flex items-center justify-center w-10 h-10 rounded-full bg-white/15 backdrop-blur-xl border border-white/20 text-white shadow-lg hover:bg-white/25"
+          aria-label="Open menu"
+          aria-expanded="false"
+        >
+          <i id="icon-menu" data-lucide="menu" class="w-5 h-5 absolute transition-all duration-300 opacity-100 rotate-0 scale-100"></i>
+          <i id="icon-close" data-lucide="x" class="w-5 h-5 absolute transition-all duration-300 opacity-0 -rotate-90 scale-50"></i>
+        </button>
+      </div>
+    </nav>
+
+    <div
+      id="menu-overlay"
+      class="lg:hidden fixed inset-0 z-20 opacity-0 pointer-events-none transition-opacity duration-300"
+    >
+      <div class="absolute inset-0 bg-[#1f2a1d]/40 backdrop-blur-sm"></div>
+    </div>
+
+    <div
+      id="menu-drawer"
+      class="lg:hidden fixed top-0 right-0 bottom-0 z-20 w-[85%] max-w-sm bg-white/95 backdrop-blur-xl shadow-2xl translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+    >
+      <div class="flex flex-col h-full pt-24 px-8 pb-8">
+        <div class="flex flex-col gap-1">
+          <a href="#mission" class="mobile-link text-2xl font-semibold text-[#1f2a1d] py-4 border-b border-[#1f2a1d]/10 transition-all duration-500 translate-x-8 opacity-0" style="transition-delay: 0ms;">
+            Purpose
+          </a>
+          <a href="#how" class="mobile-link text-2xl font-semibold text-[#1f2a1d] py-4 border-b border-[#1f2a1d]/10 transition-all duration-500 translate-x-8 opacity-0" style="transition-delay: 0ms;">
+            The Process
+          </a>
+          <a href="#pricing" class="mobile-link text-2xl font-semibold text-[#1f2a1d] py-4 border-b border-[#1f2a1d]/10 transition-all duration-500 translate-x-8 opacity-0" style="transition-delay: 0ms;">
+            Tariffs
+          </a>
+        </div>
+
+        <div
+          id="drawer-cta"
+          class="mt-8 flex flex-col gap-4 transition-all duration-500 translate-x-8 opacity-0"
+          style="transition-delay: 0ms;"
+        >
+          <a href="#signup" class="flex items-center gap-2 text-sm font-medium text-[#2d3a2a] sm:hidden">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            Sign Me Up!
+          </a>
+          <a href="#login" class="flex items-center gap-2 text-sm font-medium text-[#2d3a2a] sm:hidden">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+            Enter
+          </a>
+          <button class="mt-2 bg-[#1f2a1d] hover:bg-[#2a3827] text-white text-sm font-semibold px-5 py-3 rounded-full transition-colors">
+            Try it Live
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="relative z-10 flex flex-col items-center text-center pt-24 sm:pt-28 md:pt-32 px-4 sm:px-6">
+      <h1
+        class="reveal reveal-3 font-normal leading-[0.95] text-[#f7f3e8] text-[2rem] sm:text-4xl md:text-5xl lg:text-[4.75rem] xl:text-[5.25rem] max-w-5xl tracking-normal"
+        style="letter-spacing: -0.035em;"
+      >
+        Close the rift <span class="text-[#85AB8B]">linking<br class="hidden sm:block" /> signals and action</span>
+      </h1>
+      <p class="reveal reveal-4 mt-6 sm:mt-8 text-[#e7f0e4] text-sm sm:text-base md:text-lg leading-relaxed max-w-md px-2">
+        Shape scattered signals into meaningful outcomes via AI-driven workflows.
+      </p>
+    </div>
+
+    <div class="reveal reveal-5 absolute left-4 right-4 sm:right-auto sm:left-6 md:left-10 bottom-6 sm:bottom-8 md:bottom-10 z-10 max-w-sm">
+      <div class="flex items-center gap-2 text-[#eff5eb] sm:text-white/95 mb-3">
+        <i data-lucide="sparkles" class="w-4 h-4"></i>
+        <span class="text-sm font-semibold sm:font-medium">
+          FluxEngine<sup class="text-[10px]">TM</sup>
+        </span>
+      </div>
+      <p class="text-[#e7f0e4]/90 sm:text-white/85 text-xs leading-relaxed mb-6 max-w-xs font-medium sm:font-normal">
+        LinkFlow smoothly unites your company systems, streamlining data paths between services without having to write custom scripts.
+      </p>
+      <div class="flex items-center gap-4 flex-wrap">
+        <button class="hero-btn relative overflow-hidden bg-[#f4f7ef] sm:bg-white hover:bg-[#f0f4eb] sm:hover:bg-white/95 text-[#1f2a1d] text-sm font-semibold px-5 sm:px-6 py-2.5 sm:py-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.16)]">
+          Try it Live
+        </button>
+        <button class="text-[#f4f7ef] sm:text-white text-sm font-semibold sm:font-medium hover:opacity-80 transition-opacity">
+          Know More.
+        </button>
+      </div>
+    </div>
+
+    <div class="reveal reveal-6 hidden sm:flex absolute right-6 md:right-10 bottom-8 md:bottom-10 z-10 items-center gap-2 text-white/90 text-sm">
+      <button class="flex items-center justify-center w-6 h-6 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors" aria-label="Play Video Summary">
+        <i data-lucide="play" class="w-3 h-3 fill-white text-white ml-0.5"></i>
+      </button>
+      <span class="font-medium">How we build?</span>
+      <span class="text-white/60">1:35</span>
+    </div>
+
+  </section>
+
+  <script>
+    // Initialize Icon Graphics Elements 
+    lucide.createIcons();
+
+    /* ----------------------------------------------------
+       1. INTERACTION LOGIC (MOBILE MENU STATE DISPATCHER)
+       ---------------------------------------------------- */
+    const menuToggleBtn = document.getElementById('menu-toggle-btn');
+    const iconMenu = document.getElementById('icon-menu');
+    const iconClose = document.getElementById('icon-close');
+    const menuOverlay = document.getElementById('menu-overlay');
+    const menuDrawer = document.getElementById('menu-drawer');
+    const drawerCta = document.getElementById('drawer-cta');
+    const mobileLinks = document.querySelectorAll('.mobile-link');
+
+    let isMenuOpen = false;
+
+    function toggleMenu(forceClose = false) {
+      if (forceClose) isMenuOpen = false;
+      else isMenuOpen = !isMenuOpen;
+
+      // Accessibility attribute assignment update
+      menuToggleBtn.setAttribute('aria-expanded', isMenuOpen);
+      menuToggleBtn.setAttribute('aria-label', isMenuOpen ? 'Close menu' : 'Open menu');
+
+      if (isMenuOpen) {
+        document.body.style.overflow = 'hidden';
+
+        // Animate hamburger toggle transitions
+        iconMenu.classList.replace('opacity-100', 'opacity-0');
+        iconMenu.classList.replace('rotate-0', 'rotate-90');
+        iconMenu.classList.replace('scale-100', 'scale-50');
+
+        iconClose.classList.replace('opacity-0', 'opacity-100');
+        iconClose.classList.replace('-rotate-90', 'rotate-0');
+        iconClose.classList.replace('scale-50', 'scale-100');
+
+        // Drawer panels slide configurations
+        menuOverlay.classList.replace('opacity-0', 'opacity-100');
+        menuOverlay.classList.replace('pointer-events-none', 'pointer-events-auto');
+        menuDrawer.classList.replace('translate-x-full', 'translate-x-0');
+
+        // Apply progressive link delays upon dynamic opening sequence
+        mobileLinks.forEach((link, i) => {
+          link.style.transitionDelay = `${150 + (i * 70)}ms`;
+          link.classList.replace('translate-x-8', 'translate-x-0');
+          link.classList.replace('opacity-0', 'opacity-100');
+        });
+        
+        drawerCta.style.transitionDelay = '400ms';
+        drawerCta.classList.replace('translate-x-8', 'translate-x-0');
+        drawerCta.classList.replace('opacity-0', 'opacity-100');
+
+      } else {
+        document.body.style.overflow = '';
+
+        // Reverse hamburger animation variables back to normal state
+        iconMenu.classList.replace('opacity-0', 'opacity-100');
+        iconMenu.classList.replace('rotate-90', 'rotate-0');
+        iconMenu.classList.replace('scale-50', 'scale-100');
+
+        iconClose.classList.replace('opacity-100', 'opacity-0');
+        iconClose.classList.replace('rotate-0', '-rotate-90');
+        iconClose.classList.replace('scale-100', 'scale-50');
+
+        // Retract panels components
+        menuOverlay.classList.replace('opacity-100', 'opacity-0');
+        menuOverlay.classList.replace('pointer-events-auto', 'pointer-events-none');
+        menuDrawer.classList.replace('translate-x-0', 'translate-x-full');
+
+        // Instantly reset transitions 
+        mobileLinks.forEach((link) => {
+          link.style.transitionDelay = '0ms';
+          link.classList.replace('translate-x-0', 'translate-x-8');
+          link.classList.replace('opacity-100', 'opacity-0');
+        });
+
+        drawerCta.style.transitionDelay = '0ms';
+        drawerCta.classList.replace('translate-x-0', 'translate-x-8');
+        drawerCta.classList.replace('opacity-100', 'opacity-0');
+      }
+    }
+
+    menuToggleBtn.addEventListener('click', () => toggleMenu());
+    menuOverlay.addEventListener('click', () => toggleMenu(true));
+    mobileLinks.forEach(link => link.addEventListener('click', () => toggleMenu(true)));
+
+
+    /* ----------------------------------------------------
+       2. RECONSTRUCTED BOOMERANG VIDEO CANVAS LOADER
+       ---------------------------------------------------- */
+    const video = document.getElementById('bg-video');
+    const displayCanvas = document.getElementById('display-canvas');
+    const ctx = displayCanvas.getContext('2d');
+    
+    let frames = [];
+    let capturing = true;
+    let lastTime = -1;
+    const MAX_WIDTH = 960;
+
+    function captureFrame() {
+      if (!capturing || video.readyState < 2) return;
+      if (video.currentTime === lastTime) return;
+      lastTime = video.currentTime;
+
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      if (!vw || !vh) return;
+
+      const scale = Math.min(1, MAX_WIDTH / vw);
+      const w = Math.round(vw * scale);
+      const h = Math.round(vh * scale);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const cCtx = canvas.getContext('2d');
+      if (!cCtx) return;
+      
+      cCtx.drawImage(video, 0, 0, w, h);
+      frames.push(canvas);
+    }
+
+    // Determine tracking frame callback access interface availability
+    let rafId = 0;
+    const hasVFC = typeof video.requestVideoFrameCallback === 'function';
+
+    const rafLoop = () => {
+      captureFrame();
+      if (capturing) rafId = requestAnimationFrame(rafLoop);
+    };
+
+    const vfcLoop = () => {
+      captureFrame();
+      if (capturing && video.requestVideoFrameCallback) {
+        video.requestVideoFrameCallback(vfcLoop);
+      }
+    };
+
+    const onEnded = () => {
+      capturing = false;
+      if (frames.length > 0) {
+        // Hide standard playback element asset, reveal canvas surface layout wrapper
+        video.style.display = 'none';
+        displayCanvas.style.display = 'block';
+        startBoomerangPlayback();
+      }
+    };
+
+    const onLoaded = () => {
+      video.play().catch(() => {});
+      if (hasVFC) {
+        video.requestVideoFrameCallback(vfcLoop);
+      } else {
+        rafId = requestAnimationFrame(rafLoop);
+      }
+    };
+
+    video.addEventListener('loadedmetadata', onLoaded);
+    video.addEventListener('ended', onEnded);
+    if (video.readyState >= 1) onLoaded();
+
+    // Loop renderer processing functions logic mapping 
+    function startBoomerangPlayback() {
+      const firstFrame = frames[0];
+      displayCanvas.width = firstFrame.width;
+      displayCanvas.height = firstFrame.height;
+
+      let index = 0;
+      let direction = 1;
+      let lastRenderTime = performance.now();
+      const interval = 1000 / 30; // Strict 30 FPS Lock targeting requirement configuration
+
+      const render = (now) => {
+        if (now - lastRenderTime >= interval) {
+          lastRenderTime = now;
+          ctx.drawImage(frames[index], 0, 0);
+          
+          index += direction;
+          if (index >= frames.length - 1) {
+            index = frames.length - 1;
+            direction = -1; // Reverse play paths execution direction pointer updates
+          } else if (index <= 0) {
+            index = 0;
+            direction = 1;  // Forward sequencing loop vector resets execution sequence updates
+          }
+        }
+        requestAnimationFrame(render);
+      };
+      requestAnimationFrame(render);
+    }
+  </script>
+</body>
+</html>
